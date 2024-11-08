@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>LIFF QRコードリーダー</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.9/dayjs.min.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeLiff();
+    });
+
+    function initializeLiff() {
+      try {
+        liff.init({
+          liffId: '2006543269-lXP3NByE',
+          withLoginOnExternalBrowser: true
+        })
+        .then(() => {
+          const status = getStatusFromUrl();
+          document.getElementById('status').textContent = status || '未取得';
+          document.getElementById('scanButton').disabled = false;
+        })
+        .catch((err) => {
+          document.getElementById('status').textContent = `LIFF初期化失敗=${err}`
+          console.error('LIFFの初期化に失敗しました:', err);
+        })
+      } catch (error) {
+        document.getElementById('status').textContent = `LIFF初期化失敗=${error}`
+        console.error('LIFFの初期化に失敗しました:', error);
+      }
+    }
+
+    function getStatusFromUrl() {
+      const url = window.location.href;
+      const queryParams = getQueryParameters(url);
+      return queryParams['status'];
+    }
+
+    function getQueryParameters(url) {
+      const queryString = url.split('?')[1] || '';
+      const params = queryString.split('&');
+      const result = {};
+      
+      params.forEach(param => {
+        const [key, value] = param.split('=');
+        if (key) {
+          result[decodeURIComponent(key)] = decodeURIComponent(value || '');
+        }
+      });
+      
+      return result;
+    }
+
+    async function scanQrCode() {
+      try {
+        const result = await liff.scanCodeV2();
+        const scannedData = result.value;
+        const [companyId, uuid] = parseScannedData(scannedData);
+        if (!companyId || !uuid) {
+          alert('QRコードの形式が正しくありません。');
+          return;
+        }
+        document.getElementById('companyId').textContent = companyId;
+        document.getElementById('uuid').textContent = uuid;
+        const accessToken = liff.getAccessToken();
+        const status = getStatusFromUrl();
+        await sendDataToGAS(companyId, accessToken, uuid, status);
+        alert('データを送信しました。');
+      } catch (error) {
+        console.error('QRコードの読み取りに失敗しました:', error);
+      }
+    }
+
+    function parseScannedData(data) {
+      const parts = data.split('@');
+      if (parts.length !== 2) {
+        return [null, null];
+      }
+      return parts;
+    }
+
+    async function sendDataToGAS(companyId, accessToken, uuid, status) {
+      const url = 'YOUR_GAS_WEB_APP_URL';
+      const data = {
+        companyId: companyId,
+        accessToken: accessToken,
+        uuid: uuid,
+        timestamp: dayjs().toISOString(),
+        status: status || '未設定'
+      };
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+        if (!response.ok) {
+          throw new Error('ネットワークエラー');
+        }
+        const result = await response.text();
+        console.log('サーバーからの応答:', result);
+      } catch (error) {
+        console.error('データ送信に失敗しました:', error);
+      }
+    }
+  </script>
+</head>
+<body>
+  <h1>LIFF QRコードリーダー 2024/11/08 15:38</h1>
+  <p>企業ID: <span id="companyId">未取得</span></p>
+  <p>UUID: <span id="uuid">未取得</span></p>
+  <p>ステータス: <span id="status">初期化中...</span></p>
+  <button id="scanButton" onclick="scanQrCode()" disabled>QRコードをスキャン</button>
+</body>
+</html>
