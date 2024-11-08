@@ -108,10 +108,10 @@
           text: message
         }]).then(() => {
           console.log('メッセージが送信されました:', message);
+          liff.closeWindow();
         }).catch((error) => {
           console.error('メッセージの送信に失敗しました:', error);
         });
-        liff.closeWindow();
       } catch (error) {
         console.error('QRコードの読み取りに失敗しました:', error);
       }
