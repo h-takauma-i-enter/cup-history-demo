@@ -3,6 +3,41 @@
 <head>
   <meta charset="UTF-8">
   <title>LIFF QRコードリーダー</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    h1, p {
+      padding: 10px;
+      text-align: center;
+    }
+
+    #scanButton {
+      display: block;
+      width: 80%;
+      margin: 20px auto;
+      padding: 10px;
+      font-size: 16px;
+    }
+
+    @media (max-width: 600px) {
+      h1 {
+        font-size: 24px;
+      }
+
+      p {
+        font-size: 16px;
+      }
+
+      #scanButton {
+        font-size: 14px;
+      }
+    }
+  </style>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.9/dayjs.min.js"></script>
   <script>
@@ -110,7 +145,7 @@
   </script>
 </head>
 <body>
-  <h1>LIFF QRコードリーダー 2024/11/08 16:23</h1>
+  <h1>LIFF QRコードリーダー</h1>
   <p>企業ID: <span id="companyId">未取得</span></p>
   <p>UUID: <span id="uuid">未取得</span></p>
   <p>ステータス: <span id="status">初期化中...</span></p>
