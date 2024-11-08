@@ -101,7 +101,17 @@
         const accessToken = liff.getAccessToken();
         const status = getStatusFromUrl();
         await sendDataToGAS(companyId, accessToken, uuid, status);
-        alert('データを送信しました。');
+        const statusMessage = status === '1' ? '借りました。' : status === '0' ? '返しました。' : '未設定';
+        const message = `ステータス: ${statusMessage}`;
+        liff.sendMessages([{
+          type: 'text',
+          text: message
+        }]).then(() => {
+          console.log('メッセージが送信されました:', message);
+        }).catch((error) => {
+          console.error('メッセージの送信に失敗しました:', error);
+        });
+        liff.closeWindow();
       } catch (error) {
         console.error('QRコードの読み取りに失敗しました:', error);
       }
